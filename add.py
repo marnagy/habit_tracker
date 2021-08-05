@@ -1,8 +1,6 @@
 from argparse import ArgumentParser, Namespace
 from datetime import datetime
 
-FILE_NAME = 'habit.csv'
-
 def get_args() -> Namespace:
     parser = ArgumentParser()
 
