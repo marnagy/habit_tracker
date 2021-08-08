@@ -37,6 +37,30 @@ def get_intervals(datetimes: list[datetime]) -> list[timedelta]:
 def get_hours(td: timedelta) -> int:
 	return td.days*24 + td.seconds // 3600
 
+def get_hours_distribution(intervals: list[timedelta]) -> dict[int, int]:
+	d: dict[int, int] = defaultdict(lambda: 0)
+	for td in intervals:
+		d[get_hours(td)] += 1
+	return d
+
+def get_median(intervals: list[timedelta]) -> float:
+	median = list( map(get_hours, intervals) )
+	median.sort()
+	if len(median) == 0:
+		return (median[len(median)//2] + median[len(median)//2 + 1]) / 2
+	else:
+		return median[len(median)//2]
+	
+def get_avg(td_distribution: list[int, int]) -> float:
+	s = sum(map(lambda x: x[0]*x[1], td_distribution))
+	amount = sum(
+		map(
+			lambda x: x[1],
+			td_distribution
+		)
+	)
+	return s / amount
+
 def main():
 	args = get_args()
 
@@ -48,27 +72,40 @@ def main():
 		print('No available interval detected.', file=sys.stderr)
 		exit(-1)
 
-	d: dict[int, int] = defaultdict(lambda: 0)
-	for td in intervals:
-		d[get_hours(td)] += 1
+	d = get_hours_distribution(intervals)
 	
 	d_l = list( d.items() )
 
-	print(d)
+	#print(d)
 
-	median = list( map(get_hours, intervals) )
-	median.sort()
-	median = median[len(median)//2] if len(median) % 2 != 0 else (median[len(median)//2] + median[len(median)//2 + 1]) / 2
-
-	avg = sum(map(lambda x: x[0]*x[1], d_l)) / len(intervals)
+	median = get_median(intervals)
+	avg = get_avg(d_l)
 
 	plt.bar( list(map(lambda x: x[0], d_l)), list(map(lambda x: x[1], d_l)), align='center')
 	plt.axvline(x=avg, color='r')
 	plt.axvline(x=median, color='g')
-
 	plt.xlabel('Hours')
 	plt.ylabel('Amount')
 	plt.title( args.file )
+	plt.legend(['Average', 'Median', 'Amount'])
+	plt.show()
+	plt.clf()
+
+	# add current timedelta
+	intervals.append( datetime.now() - datetimes[-1])
+
+	d = get_hours_distribution(intervals)
+	d_l = list( d.items() )
+
+	median = get_median(intervals)
+	avg = get_avg(d_l)
+
+	plt.bar( list(map(lambda x: x[0], d_l)), list(map(lambda x: x[1], d_l)), align='center')
+	plt.axvline(x=avg, color='r')
+	plt.axvline(x=median, color='g')
+	plt.xlabel('Hours')
+	plt.ylabel('Amount')
+	plt.title( f'{args.file} + current' )
 	plt.legend(['Average', 'Median', 'Amount'])
 	plt.show()
 
