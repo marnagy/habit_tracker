@@ -7,7 +7,11 @@ import sys
 def get_args() -> Namespace:
 	parser = ArgumentParser()
 
-	parser.add_argument('-f', '--file', help='CSV file to load', required=True)
+	parser.add_argument('-f', '--file', type=str,
+		help='CSV file to load', required=True)
+	parser.add_argument('-c', '--include_current',
+		type=bool, default=False, const=True, nargs='?',
+		help='Include interval from the latest entry until now')
 
 	args = parser.parse_args()
 
@@ -73,13 +77,14 @@ def main():
 		exit(-1)
 
 	d = get_hours_distribution(intervals)
-	
-	d_l = list( d.items() )
 
-	#print(d)
+	# store distribution with saved order
+	d_l = list( d.items() )
 
 	median = get_median(intervals)
 	avg = get_avg(d_l)
+	print(f'Average: {avg:.2f}')
+	print(f'Median: {median:.2f}')
 
 	plt.bar( list(map(lambda x: x[0], d_l)), list(map(lambda x: x[1], d_l)), align='center')
 	plt.axvline(x=avg, color='r')
@@ -88,25 +93,26 @@ def main():
 	plt.ylabel('Amount')
 	plt.title( args.file )
 	plt.legend(['Average', 'Median', 'Amount'])
-	plt.show()
-	plt.clf()
+	# plt.show()
+	# plt.clf()
 
-	# add current timedelta
-	intervals.append( datetime.now() - datetimes[-1])
+	if args.include_current:
+		# add current timedelta
+		intervals.append( datetime.now() - datetimes[-1])
 
-	d = get_hours_distribution(intervals)
-	d_l = list( d.items() )
+		d = get_hours_distribution(intervals)
+		d_l = list( d.items() )
 
-	median = get_median(intervals)
-	avg = get_avg(d_l)
+		curr_median = get_median(intervals)
+		curr_avg = get_avg(d_l)
+		print(f'Average (+ current): {curr_avg:.2f}')
+		print(f'Median (+ current):  {curr_median:.2f}')
 
-	plt.bar( list(map(lambda x: x[0], d_l)), list(map(lambda x: x[1], d_l)), align='center')
-	plt.axvline(x=avg, color='r')
-	plt.axvline(x=median, color='g')
-	plt.xlabel('Hours')
-	plt.ylabel('Amount')
-	plt.title( f'{args.file} + current' )
-	plt.legend(['Average', 'Median', 'Amount'])
+		plt.bar( d_l[-1][0], d_l[-1][1], align='center', color='orange')
+		plt.axvline(x=curr_avg, color='y')
+		plt.axvline(x=curr_median, color='m')
+		plt.title( f'{args.file} + current' )
+		plt.legend(['Average', 'Median', 'Average + current', 'Median + current', 'Amount', 'Current interval'])
 	plt.show()
 
 if __name__ == '__main__':
