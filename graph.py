@@ -39,7 +39,13 @@ def get_intervals(datetimes: list[datetime]) -> list[timedelta]:
 	)
 
 def get_hours(td: timedelta) -> int:
-	return td.days*24 + td.seconds // 3600
+	return 24 * td.days + td.seconds // 3600
+
+def get_days(td: timedelta) -> int:
+	return td.days
+
+def get_weeks(td: timedelta) -> int:
+	return td.days // 7
 
 def get_hours_distribution(intervals: list[timedelta]) -> dict[int, int]:
 	d: dict[int, int] = defaultdict(lambda: 0)
