@@ -50,8 +50,8 @@ def get_hours_distribution(intervals: list[timedelta]) -> dict[int, int]:
 def get_median(intervals: list[timedelta]) -> float:
 	median = list( map(get_hours, intervals) )
 	median.sort()
-	if len(median) == 0:
-		return (median[len(median)//2] + median[len(median)//2 + 1]) / 2
+	if len(median) % 2 == 0:
+		return (median[len(median)//2] + median[len(median)//2 - 1]) / 2
 	else:
 		return median[len(median)//2]
 	
