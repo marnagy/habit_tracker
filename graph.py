@@ -7,7 +7,7 @@ import sys
 def get_args() -> Namespace:
 	parser = ArgumentParser()
 
-	parser.add_argument('-f', '--file', type=str,
+	parser.add_argument('-f', '--files', type=str, nargs='+',
 		help='CSV file to load', required=True)
 	parser.add_argument('-c', '--include_current',
 		type=bool, default=False, const=True, nargs='?',
@@ -17,18 +17,26 @@ def get_args() -> Namespace:
 
 	return args
 
-def get_datetimes_from(path: str) -> list[datetime]:
-	with open(path, 'r') as csv_file:
-		datetimes = list(
-			map(
-				lambda line: datetime.fromisoformat(line),
-				map(
-					lambda x: x.strip(),
-					csv_file.readlines()
-				)
-			)
-		)
-	return datetimes
+def get_datetimes_from(paths: list[str]) -> list[datetime]:
+	dt = list()
+	for path in paths:
+		with open(path, 'r') as csv_file:
+			for line in csv_file.readlines():
+				line = line.strip()
+				dt.append( datetime.fromisoformat(line) )
+			# datetimes = list(
+			# 	map(
+			# 		lambda line: datetime.fromisoformat(line),
+			# 		map(
+			# 			lambda x: x.strip(),
+			# 			csv_file.readlines()
+			# 		)
+			# 	)
+			# )
+	#print(dt)
+	dt.sort()
+	#print(dt)
+	return dt
 
 def get_intervals(datetimes: list[datetime]) -> list[timedelta]:
 	return list(
@@ -74,7 +82,7 @@ def get_avg(td_distribution: list[int, int]) -> float:
 def main():
 	args = get_args()
 
-	datetimes = get_datetimes_from(args.file)
+	datetimes = get_datetimes_from(args.files)
 		
 	intervals = get_intervals(datetimes)
 
@@ -97,7 +105,7 @@ def main():
 	plt.axvline(x=median, color='g')
 	plt.xlabel('Hours')
 	plt.ylabel('Amount')
-	plt.title( args.file )
+	plt.title( ' + '.join(args.files) )
 	plt.legend(['Average', 'Median', 'Amount'])
 	# plt.show()
 	# plt.clf()
@@ -117,7 +125,7 @@ def main():
 		plt.bar( d_l[-1][0], d_l[-1][1], align='center', color='orange')
 		plt.axvline(x=curr_avg, color='y')
 		plt.axvline(x=curr_median, color='m')
-		plt.title( f'{args.file} + current' )
+		plt.title( ' + '.join(args.files) + ' + current' )
 		plt.legend(['Average', 'Median', 'Average + current', 'Median + current', 'Amount', 'Current interval'])
 	plt.show()
 
