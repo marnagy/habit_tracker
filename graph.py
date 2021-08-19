@@ -112,7 +112,9 @@ def main():
 
 	if args.include_current:
 		# add current timedelta
-		intervals.append( datetime.now() - datetimes[-1])
+		current_td = datetime.now() - datetimes[-1]
+		print(current_td)
+		intervals.append( current_td )
 
 		d = get_hours_distribution(intervals)
 		d_l = list( d.items() )
@@ -122,7 +124,8 @@ def main():
 		print(f'Average (+ current): {curr_avg:.2f}')
 		print(f'Median (+ current):  {curr_median:.2f}')
 
-		plt.bar( d_l[-1][0], d_l[-1][1], align='center', color='orange')
+		current_hours = get_hours(current_td)
+		plt.bar( current_hours, d[current_hours], align='center', color='orange')
 		plt.axvline(x=curr_avg, color='y')
 		plt.axvline(x=curr_median, color='m')
 		plt.title( ' + '.join(args.files) + ' + current' )
