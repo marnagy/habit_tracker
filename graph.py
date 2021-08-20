@@ -12,6 +12,9 @@ def get_args() -> Namespace:
 	parser.add_argument('-c', '--include_current',
 		type=bool, default=False, const=True, nargs='?',
 		help='Include interval from the latest entry until now')
+	parser.add_argument('-s', '--save',
+		type=bool, default=False, const=True, nargs='?',
+		help='Save graph as PNG to current directory.')
 
 	args = parser.parse_args()
 
@@ -112,9 +115,7 @@ def main():
 
 	if args.include_current:
 		# add current timedelta
-		current_td = datetime.now() - datetimes[-1]
-		print(current_td)
-		intervals.append( current_td )
+		intervals.append( datetime.now() - datetimes[-1] )
 
 		d = get_hours_distribution(intervals)
 		d_l = list( d.items() )
@@ -124,13 +125,20 @@ def main():
 		print(f'Average (+ current): {curr_avg:.2f}')
 		print(f'Median (+ current):  {curr_median:.2f}')
 
-		current_hours = get_hours(current_td)
-		plt.bar( current_hours, d[current_hours], align='center', color='orange')
+		current_hours = get_hours(intervals[-1])
+		plt.bar( current_hours, d[current_hours], align='center')
+		plt.bar( current_hours, 1, align='center', color='orange')
 		plt.axvline(x=curr_avg, color='y')
 		plt.axvline(x=curr_median, color='m')
 		plt.title( ' + '.join(args.files) + ' + current' )
 		plt.legend(['Average', 'Median', 'Average + current', 'Median + current', 'Amount', 'Current interval'])
-	plt.show()
+	
+	if not args.save:
+		plt.show()
+	else:
+		dt = datetime.now()
+		files = args.files + (['current'] if args.include_current else [])
+		plt.savefig('{}-{}-{}_{}.png'.format(dt.day, dt.month, dt.year, '-'.join(files)))
 
 if __name__ == '__main__':
 	main()
