@@ -137,8 +137,10 @@ def main():
 		plt.show()
 	else:
 		dt = datetime.now()
-		files = args.files + (['current'] if args.include_current else [])
-		plt.savefig('{}-{}-{}_{}.png'.format(dt.day, dt.month, dt.year, '-'.join(files)))
+		files = list(map(lambda x: '.'.join(x.split('.')[:-1]), args.files)) + (['current'] if args.include_current else [])
+		out_file_name = '{}-{}-{}_{}.png'.format(dt.day, dt.month, dt.year, '-'.join(files))
+		plt.savefig(out_file_name)
+		print(f'Plot saved to {out_file_name}')
 
 if __name__ == '__main__':
 	main()
