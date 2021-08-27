@@ -1,11 +1,13 @@
 from argparse import Namespace, ArgumentParser
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from tqdm import tqdm
+from graph import get_datetimes_from, get_intervals
 
 def get_args() -> Namespace:
     parser = ArgumentParser()
 
-    parser.add_argument('-f', '--file', help='CSV file to plot', required=True)
+    parser.add_argument('-f', '--files', type=str, nargs='+',
+		help='CSV file to load', required=True)
 
     args = parser.parse_args(None)
 
@@ -13,24 +15,9 @@ def get_args() -> Namespace:
 
 def main():
     args = get_args()
-
-    with open(args.file, 'r') as csv_file:
-        datetimes = list(
-            map(
-                lambda line: datetime.fromisoformat(line),
-                map(
-                    lambda x: x.strip(),
-                    csv_file.readlines()
-                )
-            )
-        )
+    datetimes = get_datetimes_from(args.files)
     
-    intervals = list(
-        map(
-            lambda dt_pair: dt_pair[1] - dt_pair[0],
-            zip(datetimes, datetimes[1:])
-        )
-    )
+    intervals = get_intervals(datetimes)
 
     if len(intervals) > 0:
         min_interval = min(intervals) if len(intervals) > 0 else 'NaN'

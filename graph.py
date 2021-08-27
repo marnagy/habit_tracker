@@ -27,19 +27,7 @@ def get_datetimes_from(paths: list[str]) -> list[datetime]:
 			for line in csv_file.readlines():
 				line = line.strip()
 				dt.append( datetime.fromisoformat(line) )
-			# datetimes = list(
-			# 	map(
-			# 		lambda line: datetime.fromisoformat(line),
-			# 		map(
-			# 			lambda x: x.strip(),
-			# 			csv_file.readlines()
-			# 		)
-			# 	)
-			# )
-	#print(dt)
-	dt.sort()
-	#print(dt)
-	return dt
+	return sorted(dt)
 
 def get_intervals(datetimes: list[datetime]) -> list[timedelta]:
 	return list(
